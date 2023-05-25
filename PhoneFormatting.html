@@ -1,0 +1,67 @@
+<script>
+    // Explanation of phone number formatting code by Austen Green 3/30/2023
+    // These codes format a phone number input field by allowing only numeric values and some special keys (such as backspace and arrow keys), and enforcing a specific format for the phone number.
+    //     The `isNumericInput` function checks whether the key pressed is a numeric value (either from the number line or number pad).
+    //     The `isModifierKey` function checks for special keys that allow modifying the input field (such as shift, home, end, etc.)
+    //     or keys for editing the text (such as backspace, enter, etc.), as well as some specific combinations of control/command key and A/C/V/X/Z.
+    //     The `enforceFormat` function is triggered on keydown and prevents events that are neither numeric values nor modifier keys.
+    //     The `formatToPhone` function is triggered on keyup and formats the input value into a US phone number format, using the values entered by the user.
+    //     It extracts the first ten digits (i.e., area code, prefix, and line number) from the input and places them in the specified format: "(XXX) XXX - XXXX".
+    //     However, if the input contains less than 10 digits, it formats the number to "(XXX) XXX" or "(XXX)".
+    //     Finally, the code sets event listeners for both keydown and keyup events on an input element with the ID of "phonenumber".
+
+    // Format phone number
+    const isNumericInput = (event) => {
+        const key = event.keyCode;
+        return ((key >= 48 && key <= 57) || // Allow number line
+            (key >= 96 && key <= 105) // Allow number pad
+        );
+    };
+
+    const isModifierKey = (event) => {
+        const key = event.keyCode;
+        return (event.shiftKey === true || key === 35 || key === 36) || // Allow Shift, Home, End
+            (key === 8 || key === 9 || key === 13 || key === 46) || // Allow Backspace, Tab, Enter, Delete
+            (key > 36 && key < 41) || // Allow left, up, right, down
+            (
+                // Allow Ctrl/Command + A,C,V,X,Z
+                (event.ctrlKey === true || event.metaKey === true) &&
+                (key === 65 || key === 67 || key === 86 || key === 88 || key === 90)
+            )
+    };
+
+    const enforceFormat = (event) => {
+        // Input must be of a valid number format or a modifier key, and not longer than ten digits
+        if(!isNumericInput(event) && !isModifierKey(event)){
+            event.preventDefault();
+        }
+    };
+
+    const formatToPhone = (event) => {
+        if(isModifierKey(event)) {return;}
+
+        const input = event.target.value.replace(/\D/g,'').substring(0,10); // First ten digits of input only
+        const areaCode = input.substring(0,3);
+        const middle = input.substring(3,6);
+        const last = input.substring(6,10);
+
+        if(input.length > 6){event.target.value = `(${areaCode}) ${middle} - ${last}`;}
+        else if(input.length > 3){event.target.value = `(${areaCode}) ${middle}`;}
+        else if(input.length > 0){event.target.value = `(${areaCode}`;}
+    };
+
+    const inputElement = document.getElementById('phonenumber');
+    inputElement.addEventListener('keydown',enforceFormat);
+    inputElement.addEventListener('keyup',formatToPhone);
+
+
+    function handleKeyDown(event) {
+        console.log('Key pressed:', event.key);
+    }
+
+    function handleBlur() {
+        document.getElementById('myInput').focus();
+    }
+  
+  
+  </script>
